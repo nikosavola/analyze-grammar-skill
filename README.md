@@ -43,7 +43,7 @@ on Wiktionary. The agent uses that output as ground truth for its explanation.
 See [SKILL.md](SKILL.md) for the full instructions given to the agent.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e0f2fe', 'primaryBorderColor': '#0284c7', 'primaryTextColor': '#0c4a6e', 'actorBkg': '#e0f2fe', 'actorBorder': '#0284c7', 'actorTextColor': '#0c4a6e', 'signalColor': '#475569', 'signalTextColor': '#1e293b', 'noteBkgColor': '#fef9c3', 'noteBorderColor': '#ca8a04', 'noteTextColor': '#713f12'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#eef2ff', 'primaryBorderColor': '#6366f1', 'primaryTextColor': '#312e81', 'actorBkg': '#eef2ff', 'actorBorder': '#6366f1', 'actorTextColor': '#312e81', 'signalColor': '#475569', 'signalTextColor': '#1e293b', 'noteBkgColor': '#fffbeb', 'noteBorderColor': '#f59e0b', 'noteTextColor': '#78350f'}}}%%
 sequenceDiagram
     autonumber
     participant Agent
@@ -53,7 +53,7 @@ sequenceDiagram
 
     Agent->>Script: uv run ... MODEL -- "SENTENCE"
 
-    rect rgba(2, 132, 199, 0.08)
+    rect rgba(99, 102, 241, 0.08)
     Note over Script,spaCy: Load or download the model
     Script->>spaCy: load_model(MODEL)
     alt already installed
@@ -67,13 +67,13 @@ sequenceDiagram
     end
     end
 
-    rect rgba(124, 58, 237, 0.08)
+    rect rgba(20, 184, 166, 0.08)
     Note over Script,spaCy: Parse the sentence
     Script->>spaCy: nlp(SENTENCE)
     spaCy-->>Script: Doc (tokens, pos, dep, morph)
     end
 
-    rect rgba(217, 119, 6, 0.08)
+    rect rgba(244, 63, 94, 0.08)
     Note over Script,Wiktionary: Concurrent fallback lookups via asyncio.gather
     par
         Script->>Wiktionary: GET definition (token, pos is X)
@@ -82,7 +82,7 @@ sequenceDiagram
     Wiktionary-->>Script: definitions or 404
     end
 
-    rect rgba(22, 163, 74, 0.08)
+    rect rgba(245, 158, 11, 0.08)
     Script-->>Agent: syntax analysis plus fallback definitions
     Note over Agent: writes the conversational explanation (SKILL.md Step 2)
     end
