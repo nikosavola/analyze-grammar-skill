@@ -1,5 +1,9 @@
 # analyze-grammar-skill
 
+[![Test](https://github.com/nikosavola/analyze-grammar-skill/actions/workflows/test.yml/badge.svg)](https://github.com/nikosavola/analyze-grammar-skill/actions/workflows/test.yml)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+
 An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that grounds grammar explanations in spaCy's dependency parser instead of an LLM's guesses, with a Wiktionary fallback for words spaCy can't classify. Works with any language spaCy ships a trained pipeline for.
 
 ## Install
@@ -7,7 +11,7 @@ An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skil
 Clone into your agent's skills directory. The folder name must match the skill's `name` field (`analyze-grammar`):
 
 ```bash
-git clone https://github.com/<you>/analyze-grammar-skill.git ~/.claude/skills/analyze-grammar
+git clone https://github.com/nikosavola/analyze-grammar-skill.git ~/.claude/skills/analyze-grammar
 ```
 
 ## Requirements
