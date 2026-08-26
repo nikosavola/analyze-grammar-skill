@@ -6,7 +6,8 @@ config:
   # SKILL.md's headings like "Step 1: Run the analysis script" use a colon
   MD026: false
   # Match the wrapping convention already used across CODE_OF_CONDUCT.md etc.
+  # Code fences are exempt: a mermaid %%{init}%% directive must stay on one line.
   MD013:
     line_length: 120
     heading_line_length: 120
-    code_block_line_length: 120
+    code_blocks: false
