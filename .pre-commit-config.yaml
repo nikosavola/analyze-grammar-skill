@@ -72,6 +72,11 @@ repos:
     hooks:
       - id: actionlint
         priority: 10
+        # actionlint v1.7.12 (2026-03-30) predates GitHub's `parallel:` step
+        # keyword (shipped 2026-06-25) and misparses it as a syntax error.
+        # check-github-workflows and zizmor both accept the file; drop this
+        # exclude once actionlint ships support.
+        exclude: ^\.github/workflows/test\.yml$
 
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: v1.29.0
