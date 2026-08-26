@@ -11,6 +11,7 @@
 
 """Parse a sentence's grammar with spaCy, with a Wiktionary fallback for words spaCy can't classify."""
 
+import argparse
 import re
 import sys
 from urllib.parse import quote
@@ -24,10 +25,27 @@ from spacy.util import is_package
 # and there is no result worth waiting long for.
 WIKTIONARY_TIMEOUT_SECONDS = 3
 
-# argv[0] (script path), model name, sentence.
-EXPECTED_ARGC = 3
-
 HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    """Build the CLI argument parser."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Parse a sentence's grammar with spaCy, with a Wiktionary "
+            "fallback for words spaCy can't classify."
+        ),
+    )
+    parser.add_argument(
+        "model_name",
+        help=(
+            "spaCy trained pipeline name, e.g. fr_core_news_md "
+            "(see https://spacy.io/models). Falls back to the '_sm' size "
+            "if an '_md' pipeline isn't available for the language."
+        ),
+    )
+    parser.add_argument("sentence", help="The sentence to analyze.")
+    return parser
 
 
 def fetch_wiktionary_definition(word: str, lang_code: str) -> str | None:
@@ -80,28 +98,17 @@ def load_model(model_name: str) -> spacy.language.Language:
 
 def main() -> None:
     """Parse CLI args, run the spaCy pipeline, and print the analysis."""
-    if len(sys.argv) != EXPECTED_ARGC:
-        print(
-            'Usage: uv run scripts/analyze_grammar.py <spacy_model_name> "<sentence>"',
-            file=sys.stderr,
-        )
-        print(
-            'Example: uv run scripts/analyze_grammar.py fr_core_news_sm "Bonjour."',
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    args = build_arg_parser().parse_args()
 
-    model_name, sentence = sys.argv[1], sys.argv[2]
-
-    nlp = load_model(model_name)
+    nlp = load_model(args.model_name)
     # nlp.lang is the definitive language code (also the key Wiktionary
     # groups its definitions under); re-derive the name actually loaded
     # in case load_model() fell back to a different pipeline size.
     lang_code = nlp.lang
     resolved_name = f"{nlp.lang}_{nlp.meta['name']}"
-    doc = nlp(sentence)
+    doc = nlp(args.sentence)
 
-    print(f"--- Syntax analysis ({resolved_name}) for: {sentence} ---\n")
+    print(f"--- Syntax analysis ({resolved_name}) for: {args.sentence} ---\n")
     for token in doc:
         morphology = str(token.morph) or "uninflected"
         print(f"Word: {token.text}")
