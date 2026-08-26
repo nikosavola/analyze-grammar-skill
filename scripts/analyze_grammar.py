@@ -148,11 +148,15 @@ async def main() -> None:
     print(f"--- Syntax analysis ({resolved_name}) for: {args.sentence} ---\n")
     for token in doc:
         morphology = str(token.morph) or "uninflected"
-        print(f"Word: {token.text}")
+        print(f"Word [{token.i}]: {token.text}")
         print(f"  Lemma: {token.lemma_}")
         print(f"  Part of speech: {token.pos_}")
         print(f"  Morphology: {morphology}")
-        print(f"  Dependency: {token.dep_} (head -> {token.head.text})")
+        # head.text alone is ambiguous when a word repeats in the sentence
+        # (e.g. two "le"s); the index pins down exactly which token it is.
+        print(
+            f"  Dependency: {token.dep_} (head -> {token.head.text} [{token.head.i}])"
+        )
         if token.i in fallbacks:
             print(f"  Fallback dictionary lookup: {fallbacks[token.i]}")
         print("-" * 30)
