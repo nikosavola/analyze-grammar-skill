@@ -21,32 +21,6 @@ import spacy
 from spacy.cli import download
 from spacy.util import is_package
 
-MODEL_MAP = {
-    "en": "en_core_web_sm",
-    "fr": "fr_core_news_sm",
-    "es": "es_core_news_sm",
-    "de": "de_core_news_sm",
-    "it": "it_core_news_sm",
-    "pt": "pt_core_news_sm",
-    "nl": "nl_core_news_sm",
-    "zh": "zh_core_web_sm",
-    "ja": "ja_core_news_sm",
-    "ko": "ko_core_news_sm",
-    "ru": "ru_core_news_sm",
-    "pl": "pl_core_news_sm",
-    "ro": "ro_core_news_sm",
-    "el": "el_core_news_sm",
-    "da": "da_core_news_sm",
-    "sv": "sv_core_news_sm",
-    "nb": "nb_core_news_sm",
-    "fi": "fi_core_news_sm",
-    "uk": "uk_core_news_sm",
-    "hr": "hr_core_news_sm",
-    "lt": "lt_core_news_sm",
-    "sl": "sl_core_news_sm",
-    "ca": "ca_core_news_sm",
-}
-
 # Fail fast: a slow dictionary lookup shouldn't stall the whole analysis,
 # and there is no result worth waiting long for.
 WIKTIONARY_TIMEOUT_SECONDS = 3
@@ -83,7 +57,11 @@ def load_model(model_name):
         try:
             download(model_name)
         except SystemExit:
-            print(f"Error: failed to download model '{model_name}'.", file=sys.stderr)
+            print(
+                f"Error: failed to download model '{model_name}'. "
+                "Confirm the exact package name at https://spacy.io/models.",
+                file=sys.stderr,
+            )
             sys.exit(1)
     return spacy.load(model_name)
 
@@ -91,26 +69,24 @@ def load_model(model_name):
 def main():
     if len(sys.argv) != 3:
         print(
-            'Usage: uv run scripts/analyze_grammar.py <language_code> "<sentence>"',
+            'Usage: uv run scripts/analyze_grammar.py <spacy_model_name> "<sentence>"',
             file=sys.stderr,
         )
-        print(f"Supported codes: {', '.join(sorted(MODEL_MAP))}", file=sys.stderr)
-        sys.exit(1)
-
-    language_code, sentence = sys.argv[1].lower(), sys.argv[2]
-
-    model_name = MODEL_MAP.get(language_code)
-    if not model_name:
         print(
-            f"Error: language code '{language_code}' is not supported.", file=sys.stderr
+            'Example: uv run scripts/analyze_grammar.py fr_core_news_sm "Bonjour."',
+            file=sys.stderr,
         )
-        print(f"Supported codes: {', '.join(sorted(MODEL_MAP))}", file=sys.stderr)
         sys.exit(1)
+
+    model_name, sentence = sys.argv[1], sys.argv[2]
+    # spaCy pipeline names are "<lang>_<genre>_<size>"; the language code
+    # prefix doubles as the key Wiktionary groups its definitions under.
+    lang_code = model_name.split("_", 1)[0]
 
     nlp = load_model(model_name)
     doc = nlp(sentence)
 
-    print(f"--- Syntax analysis ({language_code}) for: {sentence} ---\n")
+    print(f"--- Syntax analysis ({model_name}) for: {sentence} ---\n")
     for token in doc:
         morphology = str(token.morph) if str(token.morph) else "uninflected"
         print(f"Word: {token.text}")
@@ -125,7 +101,7 @@ def main():
         # of whether spaCy actually recognized it.
         if token.pos_ == "X" and not token.is_punct and not token.is_space:
             fallback = fetch_wiktionary_definition(
-                token.lemma_ or token.text, language_code
+                token.lemma_ or token.text, lang_code
             )
             if fallback:
                 print(f"  Fallback dictionary lookup: {fallback}")

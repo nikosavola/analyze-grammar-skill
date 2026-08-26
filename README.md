@@ -16,6 +16,6 @@ git clone https://github.com/<you>/analyze-grammar-skill.git ~/.claude/skills/an
 
 ## How it works
 
-Ask an agent to explain the grammar of a sentence in any language. It runs `scripts/analyze_grammar.py <language_code> "<sentence>"`, which parses the sentence with spaCy (downloading the language model on first use) and looks up any word spaCy can't classify on Wiktionary. The agent uses that output as ground truth for its explanation.
+Ask an agent to explain the grammar of a sentence in any language. It picks the matching spaCy [trained pipeline name](https://spacy.io/models) (e.g. `fr_core_news_sm`) and runs `scripts/analyze_grammar.py <spacy_model_name> "<sentence>"`, which parses the sentence with spaCy (downloading the model on first use) and looks up any word spaCy can't classify on Wiktionary. The agent uses that output as ground truth for its explanation.
 
 See [SKILL.md](SKILL.md) for the full instructions given to the agent.
