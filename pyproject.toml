@@ -28,7 +28,7 @@ project-excludes = ["**/__pycache__"]
 # importable without packaging the standalone script; mirror that for pyrefly.
 search-path = ["scripts"]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 
