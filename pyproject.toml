@@ -1,0 +1,25 @@
+[project]
+name = "analyze-grammar-skill"
+version = "0.1.0"
+description = "Agent Skill for grammar analysis via spaCy"
+requires-python = ">=3.11"
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+  "B",  # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "E",  # pycodestyle
+  "F",  # pyflakes
+  "I",  # isort
+  "PTH",  # flake8-use-pathlib
+  "RUF",  # Ruff-specific rules
+  "SIM",  # flake8-simplify
+  "UP",  # pyupgrade
+  "W",  # pycodestyle
+]
+ignore = [
+  "E501",  # Line too long, handled by the formatter
+]

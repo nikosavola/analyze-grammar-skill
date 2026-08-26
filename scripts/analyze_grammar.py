@@ -60,7 +60,9 @@ def fetch_wiktionary_definition(word, lang_code):
     headers = {"User-Agent": "analyze-grammar-skill (https://github.com/)"}
 
     try:
-        response = requests.get(url, headers=headers, timeout=WIKTIONARY_TIMEOUT_SECONDS)
+        response = requests.get(
+            url, headers=headers, timeout=WIKTIONARY_TIMEOUT_SECONDS
+        )
         response.raise_for_status()
         data = response.json()
         entries = data.get(lang_code)
@@ -88,7 +90,10 @@ def load_model(model_name):
 
 def main():
     if len(sys.argv) != 3:
-        print('Usage: uv run scripts/analyze_grammar.py <language_code> "<sentence>"', file=sys.stderr)
+        print(
+            'Usage: uv run scripts/analyze_grammar.py <language_code> "<sentence>"',
+            file=sys.stderr,
+        )
         print(f"Supported codes: {', '.join(sorted(MODEL_MAP))}", file=sys.stderr)
         sys.exit(1)
 
@@ -96,7 +101,9 @@ def main():
 
     model_name = MODEL_MAP.get(language_code)
     if not model_name:
-        print(f"Error: language code '{language_code}' is not supported.", file=sys.stderr)
+        print(
+            f"Error: language code '{language_code}' is not supported.", file=sys.stderr
+        )
         print(f"Supported codes: {', '.join(sorted(MODEL_MAP))}", file=sys.stderr)
         sys.exit(1)
 
@@ -117,7 +124,9 @@ def main():
         # vectors, so every token registers as out-of-vocabulary regardless
         # of whether spaCy actually recognized it.
         if token.pos_ == "X" and not token.is_punct and not token.is_space:
-            fallback = fetch_wiktionary_definition(token.lemma_ or token.text, language_code)
+            fallback = fetch_wiktionary_definition(
+                token.lemma_ or token.text, language_code
+            )
             if fallback:
                 print(f"  Fallback dictionary lookup: {fallback}")
 
