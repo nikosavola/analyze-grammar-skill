@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.14"
 # dependencies = [
 #     "spacy",
 #     "httpx",
@@ -15,13 +15,16 @@ import argparse
 import asyncio
 import re
 import sys
+from typing import TYPE_CHECKING
 from urllib.parse import quote
 
 import httpx
 import spacy
 from spacy.cli import download
-from spacy.tokens import Doc
 from spacy.util import is_package
+
+if TYPE_CHECKING:
+    from spacy.tokens import Doc
 
 # Fail fast: a slow dictionary lookup shouldn't stall the whole analysis,
 # and there is no result worth waiting long for. All lookups for a sentence
@@ -69,7 +72,7 @@ async def fetch_wiktionary_definition(
             return None
         clean_def = HTML_TAG_RE.sub("", definitions[0].get("definition", ""))
         return f"{entries[0].get('partOfSpeech', 'unknown')}: {clean_def}"
-    except (httpx.HTTPError, ValueError, KeyError, IndexError):
+    except httpx.HTTPError, ValueError, KeyError, IndexError:
         return None
 
 
