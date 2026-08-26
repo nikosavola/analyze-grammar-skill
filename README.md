@@ -8,11 +8,20 @@ An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skil
 
 ## Install
 
+```bash
+npx skills add nikosavola/analyze-grammar-skill
+```
+
+<details>
+<summary>Install manually instead</summary>
+
 Clone into your agent's skills directory. The folder name must match the skill's `name` field (`analyze-grammar`):
 
 ```bash
 git clone https://github.com/nikosavola/analyze-grammar-skill.git ~/.claude/skills/analyze-grammar
 ```
+
+</details>
 
 ## Requirements
 
