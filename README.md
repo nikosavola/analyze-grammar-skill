@@ -42,6 +42,35 @@ on Wiktionary. The agent uses that output as ground truth for its explanation.
 
 See [SKILL.md](SKILL.md) for the full instructions given to the agent.
 
+```mermaid
+sequenceDiagram
+    participant Agent
+    participant Script as analyze_grammar.py
+    participant spaCy
+    participant Wiktionary
+
+    Agent->>Script: uv run ... MODEL -- "SENTENCE"
+    Script->>spaCy: load_model(MODEL)
+    alt already installed
+        spaCy-->>Script: pipeline
+    else needs download
+        Script->>spaCy: download(MODEL)
+        alt _md unavailable
+            Script->>spaCy: download(_sm fallback)
+        end
+        spaCy-->>Script: pipeline
+    end
+    Script->>spaCy: nlp(SENTENCE)
+    spaCy-->>Script: Doc (tokens, pos, dep, morph)
+    par concurrent lookups via asyncio.gather
+        Script->>Wiktionary: GET definition (token, pos is X)
+        Script->>Wiktionary: GET definition (token, pos is X)
+    end
+    Wiktionary-->>Script: definitions or 404
+    Script-->>Agent: syntax analysis plus fallback definitions
+    Note over Agent: writes the conversational explanation (SKILL.md Step 2)
+```
+
 ## Development
 
 ```bash
