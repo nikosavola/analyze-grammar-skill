@@ -1,6 +1,7 @@
 # analyze-grammar-skill
 
 [![Test](https://github.com/nikosavola/analyze-grammar-skill/actions/workflows/test.yml/badge.svg)](https://github.com/nikosavola/analyze-grammar-skill/actions/workflows/test.yml)
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=nikosavola_analyze-grammar-skill&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nikosavola_analyze-grammar-skill)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
