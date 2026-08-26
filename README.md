@@ -43,13 +43,18 @@ on Wiktionary. The agent uses that output as ground truth for its explanation.
 See [SKILL.md](SKILL.md) for the full instructions given to the agent.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e0f2fe', 'primaryBorderColor': '#0284c7', 'primaryTextColor': '#0c4a6e', 'actorBkg': '#e0f2fe', 'actorBorder': '#0284c7', 'actorTextColor': '#0c4a6e', 'signalColor': '#475569', 'signalTextColor': '#1e293b', 'noteBkgColor': '#fef9c3', 'noteBorderColor': '#ca8a04', 'noteTextColor': '#713f12'}}}%%
 sequenceDiagram
+    autonumber
     participant Agent
     participant Script as analyze_grammar.py
     participant spaCy
     participant Wiktionary
 
     Agent->>Script: uv run ... MODEL -- "SENTENCE"
+
+    rect rgba(2, 132, 199, 0.08)
+    Note over Script,spaCy: Load or download the model
     Script->>spaCy: load_model(MODEL)
     alt already installed
         spaCy-->>Script: pipeline
@@ -60,15 +65,27 @@ sequenceDiagram
         end
         spaCy-->>Script: pipeline
     end
+    end
+
+    rect rgba(124, 58, 237, 0.08)
+    Note over Script,spaCy: Parse the sentence
     Script->>spaCy: nlp(SENTENCE)
     spaCy-->>Script: Doc (tokens, pos, dep, morph)
-    par concurrent lookups via asyncio.gather
+    end
+
+    rect rgba(217, 119, 6, 0.08)
+    Note over Script,Wiktionary: Concurrent fallback lookups via asyncio.gather
+    par
         Script->>Wiktionary: GET definition (token, pos is X)
         Script->>Wiktionary: GET definition (token, pos is X)
     end
     Wiktionary-->>Script: definitions or 404
+    end
+
+    rect rgba(22, 163, 74, 0.08)
     Script-->>Agent: syntax analysis plus fallback definitions
     Note over Agent: writes the conversational explanation (SKILL.md Step 2)
+    end
 ```
 
 ## Development
