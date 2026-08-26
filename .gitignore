@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
-# The project table in pyproject.toml only exists to hold ruff config, not
-# real dependencies; a lockfile here would just be dead weight.
-uv.lock
+.coverage
+coverage.xml
+junit.xml
+.pytest_cache/

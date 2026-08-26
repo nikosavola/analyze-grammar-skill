@@ -46,11 +46,14 @@ repos:
       - id: pyrefly-check
         priority: 30
         name: Pyrefly
-        # The script's real dependencies, so imports resolve to real types
-        # instead of pyrefly reporting every import as missing.
+        # The script's and test suite's real dependencies, so imports resolve
+        # to real types instead of pyrefly reporting every import as missing.
         additional_dependencies:
           - spacy
           - httpx
+          - pytest
+          - pytest-asyncio
+          - respx
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.38.0

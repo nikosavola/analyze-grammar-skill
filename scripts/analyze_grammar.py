@@ -134,9 +134,9 @@ def load_model(model_name: str) -> spacy.language.Language:
     return spacy.load(model_name)
 
 
-async def main() -> None:
+async def main(argv: list[str] | None = None) -> None:
     """Parse CLI args, run the spaCy pipeline, and print the analysis."""
-    args = build_arg_parser().parse_args()
+    args = build_arg_parser().parse_args(argv)
 
     nlp = load_model(args.model_name)
     # nlp.lang is the definitive language code (also the key Wiktionary

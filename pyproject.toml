@@ -4,9 +4,33 @@ version = "0.1.0"
 description = "Agent Skill for grammar analysis via spaCy"
 requires-python = ">=3.14"
 
+[dependency-groups]
+dev = [
+  "httpx>=0.28.1",
+  "pytest>=9.0.0",
+  "pytest-asyncio>=1.2.0",
+  "pytest-cov>=7.0.0",
+  "respx>=0.22.0",
+  "spacy>=3.8.0",
+]
+github = ["pytest-github-actions-annotate-failures>=0.3.0"]
+
+[tool.coverage.run]
+source = ["scripts"]
+
+[tool.coverage.report]
+exclude_also = ["if __name__ == .__main__.:"]
+
 [tool.pyrefly]
-project-includes = ["scripts/**/*.py"]
+project-includes = ["scripts/**/*.py", "tests/**/*.py"]
 project-excludes = ["**/__pycache__"]
+# tests/conftest.py adds this to sys.path at runtime so `analyze_grammar` is
+# importable without packaging the standalone script; mirror that for pyrefly.
+search-path = ["scripts"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
 
 [tool.ruff]
 target-version = "py314"
@@ -89,6 +113,12 @@ ignore = [
 "scripts/*.py" = [
   "T201",  # `print` used; this is an operator-facing CLI script, not library code
   "INP001",  # implicit namespace package; standalone script, never imported
+]
+"tests/*.py" = [
+  "D",  # test names are self-documenting; a docstring would just repeat them
+  "S101",  # `assert` is how pytest tests assert
+  "INP001",  # implicit namespace package; test suite, never imported
+  "PLR2004",  # magic values (status codes, counts) are clearer inline in a test
 ]
 
 [tool.ruff.lint.pydocstyle]
