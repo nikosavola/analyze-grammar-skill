@@ -1,5 +1,7 @@
 """Tests for scripts/analyze_grammar.py."""
 
+from typing import ClassVar
+
 import analyze_grammar as ag
 import httpx
 import pytest
@@ -192,3 +194,41 @@ async def test_main_wires_parsing_lookup_and_output_together(
     assert "--- Syntax analysis (en_pipeline) for: Hello world ---" in out
     assert "Word [0]: Hello" in out
     assert "Word [1]: world" in out
+
+
+class NlpWithUnknownToken:
+    """Blank-pipeline stand-in that tags its first token "X" (unclassified),
+    so main() actually exercises the Wiktionary fallback path end to end."""
+
+    lang = "en"
+    meta: ClassVar = {"name": "pipeline"}
+
+    def __call__(self, sentence: str) -> spacy.tokens.Doc:
+        doc = spacy.blank("en")(sentence)
+        doc[0].pos_ = "X"
+        return doc
+
+
+@respx.mock
+async def test_main_prints_wiktionary_fallback_for_unclassified_token(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(ag, "load_model", lambda _name: NlpWithUnknownToken())
+    respx.get("https://en.wiktionary.org/api/rest_v1/page/definition/wuggle").mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "en": [
+                    {
+                        "partOfSpeech": "Noun",
+                        "definitions": [{"definition": "a made-up creature"}],
+                    }
+                ]
+            },
+        )
+    )
+
+    await ag.main(["en_core_web_sm", "wuggle jumped"])
+
+    out = capsys.readouterr().out
+    assert "Fallback dictionary lookup: Noun: a made-up creature" in out
