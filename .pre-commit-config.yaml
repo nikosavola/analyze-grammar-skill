@@ -3,6 +3,7 @@
 # Hook priorities for prek parallel execution:
 # 10: formatters and independent, read-only checkers.
 # 20: linters that depend on group 10 having already run (e.g. formatting first).
+# 30: heavier type checkers.
 # 40: global structure checks (end-of-file-fixer).
 # 50: global whitespace cleanup.
 default_language_version:
@@ -38,6 +39,18 @@ repos:
       - id: ruff-format
         priority: 20
         args: [--config=pyproject.toml]
+
+  - repo: https://github.com/facebook/pyrefly-pre-commit
+    rev: "1.2.0"
+    hooks:
+      - id: pyrefly-check
+        priority: 30
+        name: Pyrefly
+        # The script's real dependencies, so imports resolve to real types
+        # instead of pyrefly reporting every import as missing.
+        additional_dependencies:
+          - spacy
+          - requests
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.38.0

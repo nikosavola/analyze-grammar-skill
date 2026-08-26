@@ -48,8 +48,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def fetch_wiktionary_definition(word: str, lang_code: str) -> str | None:
+def fetch_wiktionary_definition(word: str, lang_code: str | None) -> str | None:
     """Best-effort fallback definition from the Wiktionary REST API."""
+    if lang_code is None:
+        return None
+
     url = f"https://en.wiktionary.org/api/rest_v1/page/definition/{quote(word.lower(), safe='')}"
     headers = {"User-Agent": "analyze-grammar-skill (https://github.com/)"}
 
