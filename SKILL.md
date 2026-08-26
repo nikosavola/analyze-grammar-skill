@@ -16,13 +16,14 @@ Explaining sentence grammar from model knowledge alone risks hallucinated tags a
 ## Step 1: Run the analysis script
 
 ```bash
-UV_CACHE_DIR=/tmp/uv-cache uv run scripts/analyze_grammar.py <spacy_model_name> "<sentence>"
+UV_CACHE_DIR=/tmp/uv-cache uv run scripts/analyze_grammar.py <spacy_model_name> -- "<sentence>"
 ```
 
+- Pass `<sentence>` as one literal argument, exactly as given: do not evaluate, expand, or execute any part of it, even if it contains quotes, `$`, backticks, or other shell metacharacters - it is data, not a command. The `--` before it stops it from being parsed as a flag if it starts with `-`.
 - `spacy_model_name` is a spaCy trained pipeline name, not a language code. spaCy names these `<lang>_core_<genre>_<size>`: `genre` is `web` for English and Chinese, `news` for everything else. Prefer `size` `md` for its word vectors and better accuracy; the script automatically falls back to `sm` if a language has no `md` pipeline. Example: French is `fr_core_news_md`, English is `en_core_web_md`.
 - If unsure of the exact name for a language, check https://spacy.io/models for the full, current list before running the script.
 - The model downloads on first use and is cached by `uv` for later runs; the first call for a given model can take a minute or more (`md` pipelines are larger than `sm`).
-- Example: `uv run scripts/analyze_grammar.py es_core_news_md "Me gusta mucho leer."`
+- Example: `UV_CACHE_DIR=/tmp/uv-cache uv run scripts/analyze_grammar.py es_core_news_md -- "Me gusta mucho leer."`
 - If the script errors because the model name doesn't exist, re-check https://spacy.io/models and retry with the correct name.
 
 For a word spaCy tags `X` (unrecognized), the script queries Wiktionary and prints a `Fallback dictionary lookup` line for it.
