@@ -6,9 +6,9 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
-An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that grounds grammar
-explanations in [spaCy](https://spacy.io/)'s dependency parser instead of an LLM's guesses, with a Wiktionary fallback
-for words spaCy can't classify. Works with any language spaCy ships a trained pipeline for.
+An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that gives an AI agent
+accurate grammar explanations for a sentence in any language, instead of the hallucinated tenses, moods, and
+conjugations LLMs tend to guess on their own. Covers dozens of languages, not just the common ones.
 
 ## Install
 
@@ -29,7 +29,7 @@ git clone https://github.com/nikosavola/analyze-grammar-skill.git ~/.claude/skil
 
 ## Requirements
 
-- [`uv`](https://docs.astral.sh/uv/) — the script runs via `uv run`, which manages its own dependencies (spaCy, httpx)
+- [`uv`](https://docs.astral.sh/uv/). The script runs via `uv run`, which manages its own dependencies (spaCy, httpx)
   and downloads language models on demand per [PEP 723](https://peps.python.org/pep-0723/).
 
 ## How it works
@@ -87,3 +87,23 @@ sequenceDiagram
     Note over Agent: writes the conversational explanation (SKILL.md Step 2)
     end
 ```
+
+## What spaCy provides
+
+spaCy is a regular NLP library, not an LLM: its trained pipelines are deterministic statistical models, so the same
+sentence always gets the same tags. For "Il faut que tu le fasses.", it tags "fasses" as lemma `faire`,
+`Mood=Sub|Person=3|Tense=Pres`, depending on `faut`, which is why the subjunctive is there and not a guess pulled from
+memory. A wrong tag (see below) is just a wrong tag, not a made-up explanation.
+
+This isn't retrieval-augmented generation for the grammar itself, since spaCy computes the parse and doesn't look
+anything up. The Wiktionary fallback is the actual RAG part: it looks up a definition for words spaCy can't classify.
+
+## Limitations
+
+- Model quality and confidence vary by language, and there's no signal telling the agent to trust one parse less than
+  another.
+- Wrong tags look like right tags. The Wiktionary fallback only fires on POS "X" (rare); an ordinary wrong tag isn't
+  flagged at all. In the sentence above, `fr_core_news_md` tags "tu" (clearly second person) as `Person=1`, and nothing
+  marks it as wrong.
+- Only grammar is grounded. Meaning, translation, register, and cultural nuance still come from the agent's own
+  judgment, which can be wrong.

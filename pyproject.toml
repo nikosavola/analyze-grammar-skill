@@ -16,6 +16,10 @@ dev = [
 ]
 github = ["pytest-github-actions-annotate-failures>=0.3.0"]
 
+[tool.codespell]
+# "Pres" is spaCy's Universal Dependencies abbreviation for Tense=Pres, not a typo for "Press".
+ignore-words-list = "pres"
+
 [tool.coverage.run]
 source = ["scripts"]
 
