@@ -87,9 +87,3 @@ sequenceDiagram
     Note over Agent: writes the conversational explanation (SKILL.md Step 2)
     end
 ```
-
-## Development
-
-```bash
-uv run --dev pytest --cov
-```
