@@ -57,6 +57,15 @@ def load_model(model_name):
         try:
             download(model_name)
         except SystemExit:
+            # Not every language ships an "_md" pipeline; retry with "_sm"
+            # rather than making the caller guess which languages do.
+            if model_name.endswith("_md"):
+                fallback_name = f"{model_name.removesuffix('_md')}_sm"
+                print(
+                    f"'{model_name}' isn't available; falling back to '{fallback_name}'.",
+                    file=sys.stderr,
+                )
+                return load_model(fallback_name)
             print(
                 f"Error: failed to download model '{model_name}'. "
                 "Confirm the exact package name at https://spacy.io/models.",
@@ -79,14 +88,16 @@ def main():
         sys.exit(1)
 
     model_name, sentence = sys.argv[1], sys.argv[2]
-    # spaCy pipeline names are "<lang>_<genre>_<size>"; the language code
-    # prefix doubles as the key Wiktionary groups its definitions under.
-    lang_code = model_name.split("_", 1)[0]
 
     nlp = load_model(model_name)
+    # nlp.lang is the definitive language code (also the key Wiktionary
+    # groups its definitions under); re-derive the name actually loaded
+    # in case load_model() fell back to a different pipeline size.
+    lang_code = nlp.lang
+    resolved_name = f"{nlp.lang}_{nlp.meta['name']}"
     doc = nlp(sentence)
 
-    print(f"--- Syntax analysis ({model_name}) for: {sentence} ---\n")
+    print(f"--- Syntax analysis ({resolved_name}) for: {sentence} ---\n")
     for token in doc:
         morphology = str(token.morph) if str(token.morph) else "uninflected"
         print(f"Word: {token.text}")
@@ -96,9 +107,9 @@ def main():
         print(f"  Dependency: {token.dep_} (head -> {token.head.text})")
 
         # pos_ == "X" is spaCy's genuine "I don't know what this is" signal.
-        # token.is_oov is unreliable here: the small pipelines ship no word
-        # vectors, so every token registers as out-of-vocabulary regardless
-        # of whether spaCy actually recognized it.
+        # token.is_oov is unreliable here: "_sm" pipelines ship no word
+        # vectors at all (every token reads as OOV), and even on "_md"/"_lg"
+        # it reflects vector coverage, not tagging confidence.
         if token.pos_ == "X" and not token.is_punct and not token.is_space:
             fallback = fetch_wiktionary_definition(
                 token.lemma_ or token.text, lang_code
