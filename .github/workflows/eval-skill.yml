@@ -1,0 +1,57 @@
+name: Eval skill
+
+on:
+  workflow_dispatch:
+    inputs:
+      cases:
+        description: Comma-separated eval ids from evals/evals.json to run, or "all"
+        default: "1,2,5,7"
+      model:
+        description: agy model label
+        default: "Gemini 3.5 Flash"
+  push:
+    branches: [main]
+    paths:
+      - SKILL.md
+      - scripts/**
+      - evals/evals.json
+      - evals/run_agy_evals.py
+      - .github/workflows/eval-skill.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eval-skill
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+
+      - name: Install agy (Antigravity CLI)
+        run: |
+          curl -fsSL https://antigravity.google/cli/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Configure agy for GEMINI_API_KEY auth
+        run: |
+          mkdir -p "$HOME/.gemini/antigravity-cli"
+          echo '{"modelProvider": "gemini"}' > "$HOME/.gemini/antigravity-cli/settings.json"
+
+      - name: Run evals against the skill
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          UV_CACHE_DIR: /tmp/uv-cache
+          # Indirected through env instead of interpolated into the run: script, so a crafted workflow_dispatch
+          # input can't break out of the argument and execute in a shell that has GEMINI_API_KEY in scope.
+          CASES: ${{ inputs.cases || '1,2,5,7' }}
+          MODEL: ${{ inputs.model || 'Gemini 3.5 Flash' }}
+        run: |
+          uv run evals/run_agy_evals.py --cases "$CASES" --model "$MODEL"
