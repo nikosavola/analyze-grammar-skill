@@ -1,0 +1,58 @@
+# Run with prek (https://github.com/j178/prek), a drop-in pre-commit replacement.
+#
+# Hook priorities for prek parallel execution:
+# 10: formatters and independent, read-only checkers.
+# 20: linters that depend on group 10 having already run (e.g. formatting first).
+# 40: global structure checks (end-of-file-fixer).
+# 50: global whitespace cleanup.
+default_language_version:
+  python: "3.14"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        priority: 10
+      - id: detect-private-key
+        priority: 10
+      - id: end-of-file-fixer
+        priority: 40
+      - id: trailing-whitespace
+        priority: 50
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        priority: 10
+        additional_dependencies:
+          - tomli
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.4
+    hooks:
+      - id: ruff-check
+        priority: 10
+        args: [--fix, --exit-non-zero-on-fix, --config=pyproject.toml]
+      - id: ruff-format
+        priority: 20
+        args: [--config=pyproject.toml]
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.38.0
+    hooks:
+      - id: check-github-workflows
+        priority: 10
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+        priority: 10
+
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: v1.29.0
+    hooks:
+      - id: zizmor
+        priority: 10
