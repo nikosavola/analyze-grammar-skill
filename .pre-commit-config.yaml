@@ -1,11 +1,6 @@
 # Run with prek (https://github.com/j178/prek), a drop-in pre-commit replacement.
-#
-# Hook priorities for prek parallel execution:
-# 10: formatters and independent, read-only checkers.
-# 20: linters that depend on group 10 having already run (e.g. formatting first).
-# 30: heavier type checkers.
-# 40: global structure checks (end-of-file-fixer).
-# 50: global whitespace cleanup.
+# Priority order for prek's parallel execution: 10 formatters/checkers, 20 linters
+# that need 10 to run first, 30 type checkers, 40 end-of-file-fixer, 50 whitespace.
 default_language_version:
   python: "3.14"
 
@@ -60,8 +55,7 @@ repos:
       - id: pyrefly-check
         priority: 30
         name: Pyrefly
-        # The script's and test suite's real dependencies, so imports resolve
-        # to real types instead of pyrefly reporting every import as missing.
+        # so imports resolve to real types instead of "missing"
         additional_dependencies:
           - spacy
           - httpx
@@ -81,11 +75,7 @@ repos:
     hooks:
       - id: actionlint
         priority: 10
-        # actionlint v1.7.12 (2026-03-30) predates GitHub's `parallel:` step
-        # keyword (shipped 2026-06-25) and misparses it as a syntax error.
-        # check-github-workflows and zizmor both accept the file; drop this
-        # exclude once actionlint ships support.
-        exclude: ^\.github/workflows/test\.yml$
+        # ignores a known false positive; see .github/actionlint.yaml
 
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: v1.29.0
@@ -99,23 +89,17 @@ repos:
       - id: lychee
         priority: 10
         args: [--config, .github/lychee.toml]
-        # Markdown only: scanning tests/ picks up the fake wuggle/blergon
-        # Wiktionary mock URLs, which 404 by design.
-        files: \.mdx?$
+        files: \.mdx?$  # tests/ has fake mock URLs that 404 by design
 
   - repo: https://github.com/executablebooks/mdformat
     rev: "1.0.0"
     hooks:
       - id: mdformat
         priority: 10
-        # matches markdownlint-cli2's MD013 line_length below
-        args: [--wrap=120]
+        args: [--wrap=120]  # matches markdownlint-cli2's MD013 below
         additional_dependencies:
           - mdformat-gfm
-          # Without this, mdformat treats SKILL.md's YAML frontmatter as a
-          # plain "---" thematic break and mangles it into a horizontal
-          # rule instead of leaving it alone.
-          - mdformat-frontmatter
+          - mdformat-frontmatter  # else SKILL.md's YAML frontmatter gets mangled
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.2
