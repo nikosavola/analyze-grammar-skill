@@ -8,18 +8,84 @@ requires-python = ">=3.11"
 target-version = "py311"
 
 [tool.ruff.lint]
+# pydoclint (DOC) rules are preview-only, so they must be selected by exact code
+# with preview enabled; explicit-preview-rules keeps other preview rules off
+explicit-preview-rules = true
+preview = true
 select = [
+  "A",  # flake8-builtins
+  "ANN",  # flake8-annotations
+  "ARG",  # flake8-unused-arguments
+  "ASYNC",  # flake8-async
   "B",  # flake8-bugbear
+  "BLE",  # flake8-blind-except
   "C4",  # flake8-comprehensions
-  "E",  # pycodestyle
+  "COM",  # flake8-commas
+  "D",  # pydocstyle
+  "DOC102",  # pydoclint
+  "DOC202",  # pydoclint
+  "DOC402",  # pydoclint
+  "DOC403",  # pydoclint
+  "DOC501",  # pydoclint
+  "DOC502",  # pydoclint
+  "DTZ",  # flake8-datetimez
+  "E",  # pycodestyle errors
+  "EM",  # flake8-errmsg
   "F",  # pyflakes
+  "FLY",  # flynt
+  "FURB",  # refurb
+  "G",  # flake8-logging-format
   "I",  # isort
+  "ICN",  # flake8-import-conventions
+  "INP",  # flake8-no-pep420
+  "INT",  # flake8-gettext
+  "ISC",  # flake8-implicit-str-concat
+  "LOG",  # flake8-logging
+  "N",  # pep8-naming
+  "PERF",  # perflint
+  "PGH",  # pygrep-hooks
+  "PIE",  # flake8-pie
+  "PL",  # pylint
+  "PT",  # flake8-pytest-style
   "PTH",  # flake8-use-pathlib
-  "RUF",  # Ruff-specific rules
+  "PYI",  # flake8-pyi
+  "Q",  # flake8-quotes
+  "RET",  # flake8-return
+  "RSE",  # flake8-raise
+  "RUF",  # ruff
+  "S",  # flake8-bandit
   "SIM",  # flake8-simplify
+  "SLF",  # flake8-self
+  "SLOT",  # flake8-slots
+  "T10",  # flake8-debugger
+  "T20",  # flake8-print
+  "TC",  # flake8-type-checking
+  "TD",  # flake8-todos
+  "TID",  # flake8-tidy-imports
+  "TRY",  # tryceratops
   "UP",  # pyupgrade
-  "W",  # pycodestyle
+  "W",  # pycodestyle warnings
+  "YTT",  # flake8-2020
 ]
 ignore = [
-  "E501",  # Line too long, handled by the formatter
+  "E501",  # line too long, handled by ruff-format
+  "B008",  # do not perform function calls in argument defaults
+  "C901",  # too complex
+  "B905",  # `zip()` without an explicit `strict=` parameter
+  "COM812",  # missing trailing comma, conflicts with ruff-format
+  "RUF001",  # ambiguous unicode characters (incl. lots of math)
+  "RUF003",  # -||- but for comments
+  "ANN201",  # missing return type annotation for public function
+  "PLR0913",  # too many arguments in function/method
+  "TD002",  # allow TODO comments w/o author name
+  "TD003",  # allow TODO comments w/o issue link
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = [
+  "T201",  # `print` used; this is an operator-facing CLI script, not library code
+  "INP001",  # implicit namespace package; standalone script, never imported
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

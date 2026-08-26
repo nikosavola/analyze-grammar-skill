@@ -9,8 +9,7 @@
 # ]
 # ///
 
-"""Parse a sentence's grammar with spaCy, with a Wiktionary fallback for
-words spaCy can't classify."""
+"""Parse a sentence's grammar with spaCy, with a Wiktionary fallback for words spaCy can't classify."""
 
 import re
 import sys
@@ -25,10 +24,13 @@ from spacy.util import is_package
 # and there is no result worth waiting long for.
 WIKTIONARY_TIMEOUT_SECONDS = 3
 
+# argv[0] (script path), model name, sentence.
+EXPECTED_ARGC = 3
+
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 
-def fetch_wiktionary_definition(word, lang_code):
+def fetch_wiktionary_definition(word: str, lang_code: str) -> str | None:
     """Best-effort fallback definition from the Wiktionary REST API."""
     url = f"https://en.wiktionary.org/api/rest_v1/page/definition/{quote(word.lower(), safe='')}"
     headers = {"User-Agent": "analyze-grammar-skill (https://github.com/)"}
@@ -51,7 +53,8 @@ def fetch_wiktionary_definition(word, lang_code):
         return None
 
 
-def load_model(model_name):
+def load_model(model_name: str) -> spacy.language.Language:
+    """Load a spaCy pipeline, downloading it first if needed."""
     if not is_package(model_name):
         print(f"Downloading spaCy model '{model_name}'...", file=sys.stderr)
         try:
@@ -75,8 +78,9 @@ def load_model(model_name):
     return spacy.load(model_name)
 
 
-def main():
-    if len(sys.argv) != 3:
+def main() -> None:
+    """Parse CLI args, run the spaCy pipeline, and print the analysis."""
+    if len(sys.argv) != EXPECTED_ARGC:
         print(
             'Usage: uv run scripts/analyze_grammar.py <spacy_model_name> "<sentence>"',
             file=sys.stderr,
@@ -99,7 +103,7 @@ def main():
 
     print(f"--- Syntax analysis ({resolved_name}) for: {sentence} ---\n")
     for token in doc:
-        morphology = str(token.morph) if str(token.morph) else "uninflected"
+        morphology = str(token.morph) or "uninflected"
         print(f"Word: {token.text}")
         print(f"  Lemma: {token.lemma_}")
         print(f"  Part of speech: {token.pos_}")
