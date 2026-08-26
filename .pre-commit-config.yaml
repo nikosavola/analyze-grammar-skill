@@ -50,7 +50,7 @@ repos:
         # instead of pyrefly reporting every import as missing.
         additional_dependencies:
           - spacy
-          - requests
+          - httpx
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.38.0

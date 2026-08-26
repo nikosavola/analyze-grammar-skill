@@ -16,7 +16,7 @@ git clone https://github.com/nikosavola/analyze-grammar-skill.git ~/.claude/skil
 
 ## Requirements
 
-- [`uv`](https://docs.astral.sh/uv/) — the script runs via `uv run`, which manages its own dependencies (spaCy, requests) and downloads language models on demand per [PEP 723](https://peps.python.org/pep-0723/).
+- [`uv`](https://docs.astral.sh/uv/) — the script runs via `uv run`, which manages its own dependencies (spaCy, httpx) and downloads language models on demand per [PEP 723](https://peps.python.org/pep-0723/).
 
 ## How it works
 
