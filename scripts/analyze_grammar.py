@@ -24,11 +24,13 @@ from spacy.cli import download
 from spacy.util import is_package
 
 if TYPE_CHECKING:
-    from spacy.tokens import Doc
+    from spacy.tokens import Doc, Token
 
-# Fail fast: a slow dictionary lookup shouldn't stall the whole analysis,
-# and there is no result worth waiting long for. All lookups for a sentence
-# run concurrently, so this bounds the total fallback time, not just one word.
+# Fail fast: a slow dictionary lookup shouldn't stall the whole analysis.
+# This is httpx's per-request timeout, but since every lookup for a sentence
+# runs concurrently via asyncio.gather, an ordinary failure (DNS, connection
+# refused, a 5xx, no response) still bounds the whole batch to roughly this
+# long, not this long multiplied by the number of unrecognized words.
 WIKTIONARY_TIMEOUT_SECONDS = 3
 
 HTML_TAG_RE = re.compile(r"<[^>]+>")
@@ -54,14 +56,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-async def fetch_wiktionary_definition(
-    client: httpx.AsyncClient, word: str, lang_code: str
-) -> str | None:
-    """Best-effort fallback definition from the Wiktionary REST API."""
-    url = f"https://en.wiktionary.org/api/rest_v1/page/definition/{quote(word.lower(), safe='')}"
+def wiktionary_url(title: str) -> str:
+    """Build the Wiktionary REST API definition URL for a page title."""
+    return (
+        f"https://en.wiktionary.org/api/rest_v1/page/definition/{quote(title, safe='')}"
+    )
 
+
+async def _fetch_definition_for_title(
+    client: httpx.AsyncClient, title: str, lang_code: str
+) -> str | None:
     try:
-        response = await client.get(url)
+        response = await client.get(wiktionary_url(title))
         response.raise_for_status()
         data = response.json()
         entries = data.get(lang_code)
@@ -72,25 +78,63 @@ async def fetch_wiktionary_definition(
             return None
         clean_def = HTML_TAG_RE.sub("", definitions[0].get("definition", ""))
         return f"{entries[0].get('partOfSpeech', 'unknown')}: {clean_def}"
-    except httpx.HTTPError, ValueError, KeyError, IndexError:
+    # AttributeError/TypeError guard against a 200 response whose JSON is
+    # validly-formed but not shaped like Wiktionary's usual definition
+    # payload (e.g. a list instead of a dict, or a string in place of an
+    # entry dict) - "malformed" isn't limited to non-JSON bodies.
+    except (
+        httpx.HTTPError,
+        ValueError,
+        KeyError,
+        IndexError,
+        AttributeError,
+        TypeError,
+    ):
         return None
 
 
-async def fetch_fallback_definitions(doc: Doc, lang_code: str | None) -> dict[int, str]:
-    """Look up every spaCy-unclassified token in `doc` on Wiktionary, concurrently."""
-    # pos_ == "X" is spaCy's genuine "I don't know what this is" signal.
-    # token.is_oov is unreliable here: "_sm" pipelines ship no word vectors
-    # at all (every token reads as OOV), and even on "_md"/"_lg" it reflects
-    # vector coverage, not tagging confidence.
-    lookup_tokens = [
+async def fetch_wiktionary_definition(
+    client: httpx.AsyncClient, word: str, lang_code: str
+) -> str | None:
+    """Best-effort fallback definition from the Wiktionary REST API.
+
+    Tries the word's exact casing first, since Wiktionary page titles are
+    case-sensitive (e.g. German nouns are canonically capitalized), then
+    retries lowercased if that title doesn't exist.
+    """
+    definition = await _fetch_definition_for_title(client, word, lang_code)
+    if definition is not None:
+        return definition
+    lowered = word.lower()
+    if lowered == word:
+        return None
+    return await _fetch_definition_for_title(client, lowered, lang_code)
+
+
+def tokens_needing_lookup(doc: Doc) -> list[Token]:
+    """Tokens spaCy couldn't classify, worth a Wiktionary lookup.
+
+    pos_ == "X" is spaCy's genuine "I don't know what this is" signal.
+    token.is_oov is unreliable here: "_sm" pipelines ship no word vectors
+    at all (every token reads as OOV), and even on "_md"/"_lg" it reflects
+    vector coverage, not tagging confidence.
+    """
+    return [
         token
         for token in doc
         if token.pos_ == "X" and not token.is_punct and not token.is_space
     ]
+
+
+async def fetch_fallback_definitions(doc: Doc, lang_code: str | None) -> dict[int, str]:
+    """Look up every spaCy-unclassified token in `doc` on Wiktionary, concurrently."""
+    lookup_tokens = tokens_needing_lookup(doc)
     if not lookup_tokens or lang_code is None:
         return {}
 
-    headers = {"User-Agent": "analyze-grammar-skill (https://github.com/)"}
+    headers = {
+        "User-Agent": "analyze-grammar-skill (https://github.com/nikosavola/analyze-grammar-skill)"
+    }
     async with httpx.AsyncClient(
         headers=headers, timeout=WIKTIONARY_TIMEOUT_SECONDS
     ) as client:
@@ -116,12 +160,14 @@ def load_model(model_name: str) -> spacy.language.Language:
         try:
             download(model_name)
         except SystemExit:
-            # Not every language ships an "_md" pipeline; retry with "_sm"
-            # rather than making the caller guess which languages do.
+            # Not every language ships an "_md" pipeline, and spaCy raises
+            # the same SystemExit whether the name doesn't exist or the
+            # download itself failed (network blip, registry outage) - we
+            # can't tell those apart, so this message doesn't claim either.
             if model_name.endswith("_md"):
                 fallback_name = f"{model_name.removesuffix('_md')}_sm"
                 print(
-                    f"'{model_name}' isn't available; falling back to '{fallback_name}'.",
+                    f"Couldn't download '{model_name}'; retrying with '{fallback_name}'.",
                     file=sys.stderr,
                 )
                 return load_model(fallback_name)

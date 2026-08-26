@@ -60,6 +60,7 @@ repos:
           - pytest
           - pytest-asyncio
           - respx
+          - hypothesis
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.38.0
