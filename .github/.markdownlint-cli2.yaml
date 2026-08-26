@@ -1,0 +1,12 @@
+# Configuration for markdownlint-cli2
+# https://github.com/DavidAnson/markdownlint-cli2
+config:
+  # README's collapsible "Install manually instead" section needs <details>/<summary>
+  MD033: false
+  # SKILL.md's headings like "Step 1: Run the analysis script" use a colon
+  MD026: false
+  # Match the wrapping convention already used across CODE_OF_CONDUCT.md etc.
+  MD013:
+    line_length: 120
+    heading_line_length: 120
+    code_block_line_length: 120

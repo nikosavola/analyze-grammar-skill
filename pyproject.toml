@@ -30,8 +30,8 @@ project-excludes = ["**/__pycache__"]
 search-path = ["scripts"]
 
 [tool.pytest]
-asyncio_mode = "auto"
 testpaths = ["tests"]
+asyncio_mode = "auto"
 
 [tool.ruff]
 target-version = "py314"
@@ -124,3 +124,8 @@ ignore = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.tombi.schema]
+# pyproject.toml has [tool.*] sections (pyrefly, coverage, pytest) tombi has
+# no built-in schema for; strict mode would flag those as violations.
+strict = false

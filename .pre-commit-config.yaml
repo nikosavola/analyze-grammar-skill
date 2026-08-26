@@ -46,6 +46,14 @@ repos:
         priority: 20
         args: [--config=pyproject.toml]
 
+  - repo: https://github.com/tombi-toml/tombi-pre-commit
+    rev: v1.4.1
+    hooks:
+      - id: tombi-format
+        priority: 10
+      - id: tombi-lint
+        priority: 20
+
   - repo: https://github.com/facebook/pyrefly-pre-commit
     rev: "1.2.0"
     hooks:
@@ -84,3 +92,34 @@ repos:
     hooks:
       - id: zizmor
         priority: 10
+
+  - repo: https://github.com/lycheeverse/lychee
+    rev: lychee-v0.24.2
+    hooks:
+      - id: lychee
+        priority: 10
+        args: [--config, .github/lychee.toml]
+        # Markdown only: scanning tests/ picks up the fake wuggle/blergon
+        # Wiktionary mock URLs, which 404 by design.
+        files: \.mdx?$
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: "1.0.0"
+    hooks:
+      - id: mdformat
+        priority: 10
+        # matches markdownlint-cli2's MD013 line_length below
+        args: [--wrap=120]
+        additional_dependencies:
+          - mdformat-gfm
+          # Without this, mdformat treats SKILL.md's YAML frontmatter as a
+          # plain "---" thematic break and mangles it into a horizontal
+          # rule instead of leaving it alone.
+          - mdformat-frontmatter
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.2
+    hooks:
+      - id: markdownlint-cli2
+        priority: 20
+        args: [--config, .github/.markdownlint-cli2.yaml]

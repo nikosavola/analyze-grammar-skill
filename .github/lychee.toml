@@ -1,0 +1,16 @@
+# .github/lychee.toml
+
+exclude = [
+  "http://127.0.0.1",
+  "http://localhost",
+  "example.com",
+  "example.org",
+]
+
+timeout = 10
+max_retries = 3
+retry_wait_time = 2
+
+# 403/429 accepted since some hosts (SonarCloud, Codecov) block or rate-limit
+# unauthenticated crawlers rather than actually being broken links.
+accept = [200, 204, 403, 429]

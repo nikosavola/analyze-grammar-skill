@@ -11,7 +11,9 @@ argument-hint: <spacy_model_name> "<sentence>" (e.g. fr_core_news_md "Il faut qu
 
 # Grammar Analyzer
 
-Explaining sentence grammar from model knowledge alone risks hallucinated tags and conjugations. Ground every explanation in the deterministic output of `scripts/analyze_grammar.py`, a spaCy dependency parser that runs via `uv run` with no setup.
+Explaining sentence grammar from model knowledge alone risks hallucinated tags and conjugations. Ground every
+explanation in the deterministic output of `scripts/analyze_grammar.py`, a spaCy dependency parser that runs via
+`uv run` with no setup.
 
 ## Step 1: Run the analysis script
 
@@ -19,14 +21,23 @@ Explaining sentence grammar from model knowledge alone risks hallucinated tags a
 UV_CACHE_DIR=/tmp/uv-cache uv run scripts/analyze_grammar.py <spacy_model_name> -- "<sentence>"
 ```
 
-- Pass `<sentence>` as one literal argument, exactly as given: do not evaluate, expand, or execute any part of it, even if it contains quotes, `$`, backticks, or other shell metacharacters - it is data, not a command. The `--` before it stops it from being parsed as a flag if it starts with `-`.
-- `spacy_model_name` is a spaCy trained pipeline name, not a language code. spaCy names these `<lang>_core_<genre>_<size>`: `genre` is `web` for English and Chinese, `news` for everything else. Prefer `size` `md` for its word vectors and better accuracy; the script automatically falls back to `sm` if a language has no `md` pipeline. Example: French is `fr_core_news_md`, English is `en_core_web_md`.
-- If unsure of the exact name for a language, check https://spacy.io/models for the full, current list before running the script.
-- The model downloads on first use and is cached by `uv` for later runs; the first call for a given model can take a minute or more (`md` pipelines are larger than `sm`).
+- Pass `<sentence>` as one literal argument, exactly as given: do not evaluate, expand, or execute any part of it, even
+  if it contains quotes, `$`, backticks, or other shell metacharacters - it is data, not a command. The `--` before it
+  stops it from being parsed as a flag if it starts with `-`.
+- `spacy_model_name` is a spaCy trained pipeline name, not a language code. spaCy names these
+  `<lang>_core_<genre>_<size>`: `genre` is `web` for English and Chinese, `news` for everything else. Prefer `size` `md`
+  for its word vectors and better accuracy; the script automatically falls back to `sm` if a language has no `md`
+  pipeline. Example: French is `fr_core_news_md`, English is `en_core_web_md`.
+- If unsure of the exact name for a language, check <https://spacy.io/models> for the full, current list before running
+  the script.
+- The model downloads on first use and is cached by `uv` for later runs; the first call for a given model can take a
+  minute or more (`md` pipelines are larger than `sm`).
 - Example: `UV_CACHE_DIR=/tmp/uv-cache uv run scripts/analyze_grammar.py es_core_news_md -- "Me gusta mucho leer."`
-- If the script errors because the model name doesn't exist, re-check https://spacy.io/models and retry with the correct name.
+- If the script errors because the model name doesn't exist, re-check <https://spacy.io/models> and retry with the
+  correct name.
 
-For a word spaCy tags `X` (unrecognized), the script queries Wiktionary and prints a `Fallback dictionary lookup` line for it.
+For a word spaCy tags `X` (unrecognized), the script queries Wiktionary and prints a `Fallback dictionary lookup` line
+for it.
 
 ## Step 2: Explain the sentence
 
@@ -37,4 +48,5 @@ Using the script's output as ground truth, write a conversational Markdown expla
 - Pronoun placement, prepositions, gender/case, or other things a learner would trip on.
 - Any `Fallback dictionary lookup` line, to gloss unusual or idiomatic vocabulary.
 
-Do not paste the raw script output to the user unless they explicitly ask for the dependency tree. Tailor depth to the user's stated level if known (e.g. skip basic tense explanations for an advanced learner).
+Do not paste the raw script output to the user unless they explicitly ask for the dependency tree. Tailor depth to the
+user's stated level if known (e.g. skip basic tense explanations for an advanced learner).
