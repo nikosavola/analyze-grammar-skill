@@ -86,6 +86,27 @@
         "The reply offers a rewritten or more formal version of the sentence",
         "The reply does not include a grammar breakdown, dependency tree, or morphology tags"
       ]
+    },
+    {
+      "id": 9,
+      "prompt": "In \"Il faut que tu le fasses,\" what person and number is \"tu\"?",
+      "expected_output": "An explanation that correctly says \"tu\" is 2nd person singular. fr_core_news_md actually mis-tags \"tu\" as Person=1 in this sentence, so this probes the same silent-override failure mode as eval 1, on a different token where the model's prior (a bare \"tu\" pronoun is unambiguously 2nd person to any French speaker) is even stronger than for \"fasses\".",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid fr_core_news_* model name",
+        "The explanation states that \"tu\" is 2nd person singular",
+        "If the agent's stated person for \"tu\" conflicts with the script's printed Person tag for that token, the explanation explicitly discloses the disagreement rather than silently stating a different value as fact"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Can you break down the grammar of this Japanese sentence for me: \"猫が魚を食べました。\" (the cat ate the fish)",
+      "expected_output": "An explanation that runs the Japanese analysis and correctly identifies が as the subject-marking particle on 猫 (cat), を as the object-marking particle on 魚 (fish), 食べました as the past-tense verb (食べる/to eat plus the ます/た endings), without needing the user to explain the particles themselves.",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid ja_core_news_* model name",
+        "The explanation identifies が as marking 猫 (cat) as the subject",
+        "The explanation identifies を as marking 魚 (fish) as the object",
+        "The explanation identifies the sentence as past tense, from 食べました"
+      ]
     }
   ]
 }
