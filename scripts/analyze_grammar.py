@@ -196,11 +196,20 @@ async def main(argv: list[str] | None = None) -> None:
 
     print(f"--- Syntax analysis ({resolved_name}) for: {args.sentence} ---\n")
     for token in doc:
-        morphology = str(token.morph) or "uninflected"
         print(f"Word [{token.i}]: {token.text}")
         print(f"  Lemma: {token.lemma_}")
         print(f"  Part of speech: {token.pos_}")
-        print(f"  Morphology: {morphology}")
+        morph_features = token.morph.to_dict()
+        if morph_features:
+            # One feature per line, not a packed "Mood=Sub|Number=Sing|Person=3" string: a
+            # feature that conflicts with the reader's expectation (e.g. Person=3 on a "tu"
+            # form) is easy to skim past when it's buried mid-string next to features that
+            # don't surprise anyone.
+            print("  Morphology:")
+            for feature, value in morph_features.items():
+                print(f"    {feature}: {value}")
+        else:
+            print("  Morphology: uninflected")
         # head.text alone is ambiguous when a word repeats in the sentence
         # (e.g. two "le"s); the index pins down exactly which token it is.
         print(
