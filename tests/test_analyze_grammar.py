@@ -351,6 +351,34 @@ async def test_main_wires_parsing_lookup_and_output_together(
     assert "Word [1]: world" in out
 
 
+class NlpWithMorphOnFirstToken:
+    """Blank-pipeline stand-in that sets morphology on its first token only, so main()
+    exercises both the populated-Morphology branch and the "uninflected" fallback."""
+
+    lang = "en"
+    meta: ClassVar = {"name": "pipeline"}
+
+    def __call__(self, sentence: str) -> spacy.tokens.Doc:
+        doc = spacy.blank("en")(sentence)
+        doc[0].set_morph("Number=Sing|Person=2")  # pyrefly: ignore  # real method, stub is incomplete
+        return doc
+
+
+async def test_main_prints_morphology_one_feature_per_line(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # A packed "Number=Sing|Person=2" string is what token.morph used to print on one
+    # line; main() must now expand it under an indented "Morphology:" header instead,
+    # and fall back to "uninflected" for a token with no morphology at all.
+    monkeypatch.setattr(ag, "load_model", lambda _name: NlpWithMorphOnFirstToken())
+
+    await ag.main(["en_core_web_sm", "tu fasses"])
+
+    out = capsys.readouterr().out
+    assert "  Morphology:\n    Number: Sing\n    Person: 2\n" in out
+    assert "  Morphology: uninflected\n" in out
+
+
 class NlpWithUnknownToken:
     """Blank-pipeline stand-in that tags its first token "X" (unclassified),
     so main() actually exercises the Wiktionary fallback path end to end."""

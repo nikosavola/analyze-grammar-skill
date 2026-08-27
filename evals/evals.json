@@ -1,0 +1,113 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nikosavola/analyze-grammar-skill/main/evals/evals.schema.json",
+  "skill_name": "analyze-grammar",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Using the analyze-grammar skill, explain the grammar of this French sentence: \"Il faut que tu le fasses.\" I'm especially confused about why \"fasses\" looks like that.",
+      "expected_output": "An explanation that runs the analysis script with a French spaCy model, identifies \"fasses\" as a present subjunctive of \"faire\" triggered by the impersonal construction \"il faut que\", and explains the subjunctive mood in plain terms without dumping the raw script output.",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid fr_core_news_* model name",
+        "The explanation states the mood of \"fasses\" is subjunctive",
+        "The explanation attributes the subjunctive to the \"il faut que\" construction",
+        "The raw script output (token index brackets, dependency arrows) is not pasted verbatim into the final reply",
+        "The explanation does not silently contradict the morphology tags the script printed: any disagreement with a printed tag is explicitly disclosed, not stated as fact"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "hey why is it \"dem Mann\" and not \"der Mann\" in \"Ich gebe dem Mann das Buch\"? can you break down the grammar",
+      "expected_output": "An explanation that runs the German analysis, identifies \"dem Mann\" as dative case marking the indirect object, and contrasts it with the nominative \"der Mann\", without requiring the user to have named the skill explicitly.",
+      "expectations": [
+        "The agent invoked the analyze-grammar skill without the user naming it explicitly",
+        "The agent ran scripts/analyze_grammar.py with a valid de_core_news_* model name",
+        "The explanation identifies \"dem Mann\" as dative case",
+        "The explanation identifies \"dem Mann\" as the indirect object of \"geben\"",
+        "The explanation does not silently contradict the case/dependency tags the script printed: any disagreement with a printed tag is explicitly disclosed, not stated as fact"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Can you break down the grammar of this Lithuanian sentence for me: \"Aš noriu valgyti obuolį.\"",
+      "expected_output": "The agent picks a real Lithuanian spaCy model name, runs the script, and produces a grammar explanation, without needing to intervene manually even if the language only has an sm-sized pipeline.",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid lt_core_news_* model name",
+        "The script completed successfully with at most one retry due to a bad model name",
+        "The agent did not give up or apologize that the language isn't supported",
+        "The explanation correctly identifies the root verb and its direct object"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "What's going on grammatically in \"He kicked the bucket last night\"? The verb tense seems simple but I don't get the meaning.",
+      "expected_output": "An explanation that correctly parses the literal tense/aspect (simple past) but also flags that \"kicked the bucket\" is an idiom meaning \"died\", rather than explaining it as a literal kicking event.",
+      "expectations": [
+        "The explanation correctly identifies the tense as simple past",
+        "The explanation explicitly notes that \"kick the bucket\" is an idiom and states its idiomatic meaning (to die)",
+        "The explanation does not present the idiom as a literal physical action without qualification"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Translate \"Il faut que tu le fasses.\" into English for me.",
+      "expected_output": "A plain translation with no grammar breakdown, dependency parse, or invocation of the analyze-grammar skill.",
+      "expectations": [
+        "The agent did not run scripts/analyze_grammar.py",
+        "The reply is a translation, not a grammar explanation",
+        "The reply does not mention tense, mood, case, or dependency parsing terminology unprompted"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What does \"faut\" mean in French?",
+      "expected_output": "A short definition/gloss of \"faut\" with no full-sentence grammar breakdown, since there is no sentence to analyze and no grammar question was asked.",
+      "expectations": [
+        "The agent did not run scripts/analyze_grammar.py",
+        "The reply is a vocabulary definition, not a grammatical analysis",
+        "The reply does not include a dependency tree or morphology tags"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Can you show me the dependency tree for this sentence: \"The cat that I saw yesterday was black.\"",
+      "expected_output": "The agent runs the analysis script on the English sentence and, because the user explicitly asked for a dependency tree, shows the actual dependency structure (not just a prose summary), correctly handling the relative clause \"that I saw yesterday\" modifying \"cat\".",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid en_core_web_* model name",
+        "The reply includes the dependency structure or tree, not just prose, since the user explicitly asked for it",
+        "The explanation correctly identifies \"that I saw yesterday\" as a relative clause modifying \"cat\"",
+        "The explanation correctly identifies \"was\" as the main clause verb with \"cat\" as its subject"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Can you make this sentence sound more formal: \"Il faut que tu le fasses.\"",
+      "expected_output": "A rewritten, more formal French sentence (a style/register rewrite), with no grammar breakdown, dependency parse, or invocation of the analyze-grammar skill, since this is a style request sharing surface similarity with the grammar-analysis cases but is a different task.",
+      "expectations": [
+        "The agent did not run scripts/analyze_grammar.py",
+        "The reply offers a rewritten or more formal version of the sentence",
+        "The reply does not include a grammar breakdown, dependency tree, or morphology tags"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "In \"Il faut que tu le fasses,\" what person and number is \"tu\"?",
+      "expected_output": "An explanation that correctly says \"tu\" is 2nd person singular. As of spaCy 3.8.16 / fr_core_news_md 3.8.0, the model mis-tags \"tu\" as Person=1 in this sentence, so this probes the same silent-override failure mode as eval 1, on a different token where the model's prior (a bare \"tu\" pronoun is unambiguously 2nd person to any French speaker) is even stronger than for \"fasses\". If a future model version fixes this mis-tag, expectation 3 below passes vacuously (nothing to disclose) - re-verify against a live run before trusting a pass on this case, and consider re-baselining with a fresh known-mistagged token if that happens.",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid fr_core_news_* model name",
+        "The explanation states that \"tu\" is 2nd person singular",
+        "If the agent's stated person for \"tu\" conflicts with the script's printed Person tag for that token, the explanation explicitly discloses the disagreement rather than silently stating a different value as fact"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Can you break down the grammar of this Japanese sentence for me: \"猫が魚を食べました。\" (the cat ate the fish)",
+      "expected_output": "An explanation that runs the Japanese analysis and correctly identifies が as the subject-marking particle on 猫 (cat), を as the object-marking particle on 魚 (fish), 食べました as the past-tense verb (食べる/to eat plus the ます/た endings), without needing the user to explain the particles themselves.",
+      "expectations": [
+        "The agent ran scripts/analyze_grammar.py with a valid ja_core_news_* model name",
+        "The explanation identifies が as marking 猫 (cat) as the subject",
+        "The explanation identifies を as marking 魚 (fish) as the object",
+        "The explanation identifies the sentence as past tense, from 食べました"
+      ]
+    }
+  ]
+}

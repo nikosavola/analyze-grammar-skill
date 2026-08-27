@@ -44,9 +44,17 @@ for it.
 Using the script's output as ground truth, write a conversational Markdown explanation covering:
 
 - The root verb, main clause, and any dependent clauses.
-- Tense, mood, and agreement, from the `Morphology` line.
+- Tense, mood, and agreement, from the `Morphology` block.
 - Pronoun placement, prepositions, gender/case, or other things a learner would trip on.
 - Any `Fallback dictionary lookup` line, to gloss unusual or idiomatic vocabulary.
 
 Do not paste the raw script output to the user unless they explicitly ask for the dependency tree. Tailor depth to the
 user's stated level if known (e.g. skip basic tense explanations for an advanced learner).
+
+For a feature you have no reason to doubt, use exactly the value the `Morphology` block printed rather than your own
+sense of the sentence. spaCy's tagger is not perfect, though, and person/number are the fields most likely to be wrong:
+when a printed value looks obviously wrong (e.g. it contradicts what the pronoun plainly is), give the correct value as
+your actual answer, and separately tell the user the tool printed a different value for that field. Never silently state
+the tool's value as fact when you believe it is wrong, and never blend your own correction into the answer as if it came
+from the tool - the two need to stay distinguishable to the reader. The whole point of grounding in the script's output
+is that the user can trust the explanation reflects what the tool actually said, correction or not.

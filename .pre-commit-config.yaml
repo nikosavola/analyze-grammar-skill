@@ -69,6 +69,11 @@ repos:
     hooks:
       - id: check-github-workflows
         priority: 10
+      - id: check-jsonschema
+        name: check-jsonschema (evals.json)
+        priority: 10
+        files: ^evals/evals\.json$
+        args: [--schemafile, evals/evals.schema.json]
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12
