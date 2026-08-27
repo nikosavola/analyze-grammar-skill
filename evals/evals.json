@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/nikosavola/analyze-grammar-skill/main/evals/evals.schema.json",
   "skill_name": "analyze-grammar",
   "evals": [
     {

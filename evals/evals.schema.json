@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/nikosavola/analyze-grammar-skill/main/evals/evals.schema.json",
+  "title": "skill-creator evals.json",
+  "description": "Eval cases for a Claude Code Agent Skill, in the format skill-creator (https://github.com/anthropics/skills/tree/main/skills/skill-creator) reads and grades.",
+  "type": "object",
+  "required": ["skill_name", "evals"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Points editors and validators at this schema; not part of skill-creator's own evals.json format."
+    },
+    "skill_name": {
+      "type": "string",
+      "description": "Must match the skill's SKILL.md frontmatter `name`."
+    },
+    "evals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "prompt", "expected_output", "expectations"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique integer identifier for the case."
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The realistic user task to execute."
+          },
+          "expected_output": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable description of what success looks like."
+          },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Optional input file paths, relative to the skill root."
+          },
+          "expectations": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "description": "Verifiable statements graded against the run's outputs and transcript."
+          }
+        }
+      }
+    }
+  }
+}

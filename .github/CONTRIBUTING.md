@@ -35,14 +35,14 @@ model and runs the script end to end, on every push.
 ## Evaluating changes to the skill
 
 `pytest` covers `scripts/analyze_grammar.py`, not the quality of the grammar explanations an agent writes from its
-output. That's what `evals/evals.json` is for: a set of realistic prompts, each with a human-readable
-`expected_output` and a list of verifiable `expectations`, following the
+output. That's what `evals/evals.json` is for: a set of realistic prompts, each with a human-readable `expected_output`
+and a list of verifiable `expectations`, following the
 [Claude Code skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) format.
 
-If you change `SKILL.md` or `scripts/analyze_grammar.py` in a way that could affect the explanations an agent
-produces, run the evals with `/skill-creator` (in Claude Code, on this repo). It spawns a subagent per eval case with
-the skill available and a matched baseline subagent without it, grades each run's outputs against the case's
-`expectations`, and aggregates the results into pass rates and a with/without delta. It writes everything to
+If you change `SKILL.md` or `scripts/analyze_grammar.py` in a way that could affect the explanations an agent produces,
+run the evals with `/skill-creator` (in Claude Code, on this repo). It spawns a subagent per eval case with the skill
+available and a matched baseline subagent without it, grades each run's outputs against the case's `expectations`, and
+aggregates the results into pass rates and a with/without delta. It writes everything to
 `../analyze-grammar-skill-workspace/` (a sibling of this repo, not inside it, so nothing lands in git by accident).
 
 When adding new eval cases to `evals/evals.json`, keep `expectations` objectively checkable from the transcript and
