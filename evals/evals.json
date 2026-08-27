@@ -11,7 +11,7 @@
         "The explanation states the mood of \"fasses\" is subjunctive",
         "The explanation attributes the subjunctive to the \"il faut que\" construction",
         "The raw script output (token index brackets, dependency arrows) is not pasted verbatim into the final reply",
-        "The explanation does not contradict the morphology tags the script printed"
+        "The explanation does not silently contradict the morphology tags the script printed: any disagreement with a printed tag is explicitly disclosed, not stated as fact"
       ]
     },
     {
@@ -23,7 +23,7 @@
         "The agent ran scripts/analyze_grammar.py with a valid de_core_news_* model name",
         "The explanation identifies \"dem Mann\" as dative case",
         "The explanation identifies \"dem Mann\" as the indirect object of \"geben\"",
-        "The explanation does not contradict the case/dependency tags the script printed"
+        "The explanation does not silently contradict the case/dependency tags the script printed: any disagreement with a printed tag is explicitly disclosed, not stated as fact"
       ]
     },
     {
@@ -91,7 +91,7 @@
     {
       "id": 9,
       "prompt": "In \"Il faut que tu le fasses,\" what person and number is \"tu\"?",
-      "expected_output": "An explanation that correctly says \"tu\" is 2nd person singular. fr_core_news_md actually mis-tags \"tu\" as Person=1 in this sentence, so this probes the same silent-override failure mode as eval 1, on a different token where the model's prior (a bare \"tu\" pronoun is unambiguously 2nd person to any French speaker) is even stronger than for \"fasses\".",
+      "expected_output": "An explanation that correctly says \"tu\" is 2nd person singular. As of spaCy 3.8.16 / fr_core_news_md 3.8.0, the model mis-tags \"tu\" as Person=1 in this sentence, so this probes the same silent-override failure mode as eval 1, on a different token where the model's prior (a bare \"tu\" pronoun is unambiguously 2nd person to any French speaker) is even stronger than for \"fasses\". If a future model version fixes this mis-tag, expectation 3 below passes vacuously (nothing to disclose) - re-verify against a live run before trusting a pass on this case, and consider re-baselining with a fresh known-mistagged token if that happens.",
       "expectations": [
         "The agent ran scripts/analyze_grammar.py with a valid fr_core_news_* model name",
         "The explanation states that \"tu\" is 2nd person singular",

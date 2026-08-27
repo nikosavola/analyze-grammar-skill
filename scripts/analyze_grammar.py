@@ -201,10 +201,10 @@ async def main(argv: list[str] | None = None) -> None:
         print(f"  Part of speech: {token.pos_}")
         morph_features = token.morph.to_dict()
         if morph_features:
-            # One feature per line, not a packed "Mood=Sub|Number=Sing|Person=3" string: a
-            # feature that conflicts with the reader's expectation (e.g. Person=3 on a "tu"
-            # form) is easy to skim past when it's buried mid-string next to features that
-            # don't surprise anyone.
+            # One feature per line, not a packed "Mood=Sub|Number=Sing|Person=3" string.
+            # A conflicting feature (e.g. Person=3 on a "tu" form) was observed to get
+            # skimmed past when buried mid-string; SKILL.md's disclosure instruction is
+            # the actual rule, this format just makes each value easier to quote in full.
             print("  Morphology:")
             for feature, value in morph_features.items():
                 print(f"    {feature}: {value}")

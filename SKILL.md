@@ -51,9 +51,10 @@ Using the script's output as ground truth, write a conversational Markdown expla
 Do not paste the raw script output to the user unless they explicitly ask for the dependency tree. Tailor depth to the
 user's stated level if known (e.g. skip basic tense explanations for an advanced learner).
 
-For each morphological feature you state (mood, tense, person, number, etc.), use exactly the value the `Morphology`
-block printed for that token, not the value you would infer from the pronoun or your own sense of the sentence. spaCy's
-tagger is not perfect, and person/number are the fields most likely to be wrong. If you are confident a printed value is
-wrong, say so as an explicit aside to the user; do not quietly write your own corrected value as if it were the tool's
-output. The whole point of grounding in the script's output is that the user can trust the explanation reflects what the
-tool actually said.
+For a feature you have no reason to doubt, use exactly the value the `Morphology` block printed rather than your own
+sense of the sentence. spaCy's tagger is not perfect, though, and person/number are the fields most likely to be wrong:
+when a printed value looks obviously wrong (e.g. it contradicts what the pronoun plainly is), give the correct value as
+your actual answer, and separately tell the user the tool printed a different value for that field. Never silently state
+the tool's value as fact when you believe it is wrong, and never blend your own correction into the answer as if it came
+from the tool - the two need to stay distinguishable to the reader. The whole point of grounding in the script's output
+is that the user can trust the explanation reflects what the tool actually said, correction or not.
